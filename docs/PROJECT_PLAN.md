@@ -78,3 +78,57 @@
 
 \- \[ ] Final EXE Build
 
+
+
+
+
+\# Eurolab Pro Roadmap
+
+
+
+\## ✅ Completed
+
+\- Project Setup
+
+\- Git \& GitHub
+
+\- Login
+
+\- Dashboard
+
+\- Sidebar
+
+\- Sample Receiving
+
+\- Company Master
+
+
+
+\## 🔄 In Progress
+
+\- Bath Master
+
+
+
+\## ⏳ Pending
+
+\- Analysis Module
+
+\- Formula Engine
+
+\- Report Generator
+
+\- PDF Generator
+
+\- Excel Automation
+
+\- Dashboard Analytics
+
+\- Backup \& Restore
+
+\- User Roles
+
+\- Search \& Filters
+
+\- Final Windows EXE
+

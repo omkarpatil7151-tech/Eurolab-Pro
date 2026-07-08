@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import { Bell, LogOut, Search } from "lucide-react";
 import { Sidebar } from "@/layouts/Sidebar";
+import { BathMasterPage } from "@/features/baths/BathMasterPage";
 import { Dashboard } from "@/pages/Dashboard";
 import { ModulePage } from "@/pages/ModulePage";
+import { CompanyMasterPage } from "@/features/companies/CompanyMasterPage";
 import { SampleReceivingPage } from "@/features/sample-receiving/SampleReceivingPage";
 import { moduleDescriptions, navigationItems, type NavigationKey } from "@/constants/navigation";
 
@@ -49,8 +51,10 @@ export function AppShell({ onSignOut }: AppShellProps) {
 
         <section className="flex-1 overflow-auto p-8">
           {activeItem === "dashboard" && <Dashboard onNavigate={setActiveItem} />}
+          {activeItem === "companies" && <CompanyMasterPage />}
+          {activeItem === "baths" && <BathMasterPage />}
           {activeItem === "sample-receiving" && <SampleReceivingPage />}
-          {activeItem !== "dashboard" && activeItem !== "sample-receiving" && (
+          {activeItem !== "dashboard" && activeItem !== "companies" && activeItem !== "baths" && activeItem !== "sample-receiving" && (
             <ModulePage icon={activeNavigationItem.icon} title={activeNavigationItem.label} description={moduleDescriptions[activeItem]} />
           )}
         </section>

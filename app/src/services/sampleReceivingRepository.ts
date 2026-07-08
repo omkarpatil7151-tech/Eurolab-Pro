@@ -3,7 +3,7 @@ import type { SampleReceivingInput, SampleReceivingSaveResult, SelectOption } fr
 export interface SampleReceivingRepository {
   getNextCertificateNumber(): Promise<string>;
   listCompanies(): Promise<SelectOption[]>;
-  listBaths(): Promise<SelectOption[]>;
+  listBaths(companyId: number): Promise<SelectOption[]>;
   save(input: SampleReceivingInput): Promise<SampleReceivingSaveResult>;
 }
 
@@ -22,8 +22,8 @@ export const sampleReceivingRepository: SampleReceivingRepository = {
   listCompanies() {
     return getDesktopApi().sampleReceiving.listCompanies();
   },
-  listBaths() {
-    return getDesktopApi().sampleReceiving.listBaths();
+  listBaths(companyId) {
+    return getDesktopApi().sampleReceiving.listBaths(companyId);
   },
   save(input) {
     return getDesktopApi().sampleReceiving.save(input);

@@ -9,7 +9,7 @@ export function registerSampleReceivingHandlers(): void {
     sampleReceivingRepository.getNextCertificateNumber()
   );
   ipcMain.handle("sample-receiving:list-companies", () => sampleReceivingRepository.listCompanies());
-  ipcMain.handle("sample-receiving:list-baths", () => sampleReceivingRepository.listBaths());
+  ipcMain.handle("sample-receiving:list-baths", (_event, companyId: number) => sampleReceivingRepository.listBaths(companyId));
   ipcMain.handle("sample-receiving:save", (_event, input: SampleReceivingInput) =>
     sampleReceivingRepository.save(input)
   );

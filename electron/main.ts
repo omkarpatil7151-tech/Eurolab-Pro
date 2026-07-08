@@ -1,6 +1,8 @@
 import { app, BrowserWindow, nativeTheme } from "electron";
 import path from "node:path";
 import { initializeDatabase } from "./services/database";
+import { registerBathHandlers } from "./ipc/bathHandlers";
+import { registerCompanyHandlers } from "./ipc/companyHandlers";
 import { registerSampleReceivingHandlers } from "./ipc/sampleReceivingHandlers";
 
 const isDevelopment = Boolean(process.env.VITE_DEV_SERVER_URL);
@@ -38,6 +40,8 @@ function createMainWindow(): BrowserWindow {
 app.whenReady().then(async () => {
   nativeTheme.themeSource = "light";
   await initializeDatabase(app.getPath("userData"));
+  registerBathHandlers();
+  registerCompanyHandlers();
   registerSampleReceivingHandlers();
   createMainWindow();
 

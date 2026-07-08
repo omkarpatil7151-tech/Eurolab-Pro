@@ -40,7 +40,7 @@ declare module "electron" {
   };
 
   export const ipcMain: {
-    handle(channel: string, listener: (event: unknown, ...args: unknown[]) => unknown): void;
+    handle(channel: string, listener: (event: unknown, ...args: any[]) => unknown): void;
   };
 
   export const ipcRenderer: {

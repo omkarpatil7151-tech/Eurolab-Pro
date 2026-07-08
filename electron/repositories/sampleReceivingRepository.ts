@@ -26,13 +26,21 @@ export interface SampleReceivingInput {
 export interface SampleReceivingRepository {
   getNextCertificateNumber(): string;
   listCompanies(): SelectOptionRecord[];
-  listBaths(): SelectOptionRecord[];
+  listBaths(companyId: number): SelectOptionRecord[];
   save(input: SampleReceivingInput): { id: number; certificateNumber: string };
 }
 
-function mapOptionRows(tableName: "companies" | "baths"): SelectOptionRecord[] {
+function mapOptionRows(tableName: "companies" | "baths", companyId?: number): SelectOptionRecord[] {
   const database = getDatabase();
-  const result = database.exec(`SELECT id, name FROM ${tableName} ORDER BY name ASC;`)[0];
+  const result = database.exec(
+    tableName === "companies"
+      ? "SELECT id, name FROM companies WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name ASC;"
+      : `SELECT id, name FROM baths
+         WHERE deleted_at IS NULL
+           AND is_active = 1
+           AND company_id = ${Number(companyId ?? 0)}
+         ORDER BY name ASC;`
+  )[0];
 
   if (!result) {
     return [];
@@ -66,8 +74,8 @@ export const sampleReceivingRepository: SampleReceivingRepository = {
     return mapOptionRows("companies");
   },
 
-  listBaths() {
-    return mapOptionRows("baths");
+  listBaths(companyId) {
+    return mapOptionRows("baths", companyId);
   },
 
   save(input) {
