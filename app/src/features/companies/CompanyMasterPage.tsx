@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Building2, Edit3, Plus, RotateCcw, Save, Search, Trash2 } from "lucide-react";
+import { Building2, Edit3, RotateCcw, Save, Search, Trash2 } from "lucide-react";
 import { FormField } from "@/components/forms/FormField";
 import { TextAreaInput } from "@/components/forms/TextAreaInput";
 import { TextInput } from "@/components/forms/TextInput";

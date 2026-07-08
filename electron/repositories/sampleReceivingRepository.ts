@@ -32,24 +32,57 @@ export interface SampleReceivingRepository {
 
 function mapOptionRows(tableName: "companies" | "baths", companyId?: number): SelectOptionRecord[] {
   const database = getDatabase();
-  const result = database.exec(
+  const statement = database.prepare(
     tableName === "companies"
       ? "SELECT id, name FROM companies WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name ASC;"
       : `SELECT id, name FROM baths
          WHERE deleted_at IS NULL
            AND is_active = 1
-           AND company_id = ${Number(companyId ?? 0)}
+           AND company_id = ?
          ORDER BY name ASC;`
-  )[0];
+  );
+  const rows: unknown[][] = [];
 
-  if (!result) {
-    return [];
+  try {
+    if (tableName === "baths") {
+      statement.bind([Number(companyId ?? 0)]);
+    }
+
+    while (statement.step()) {
+      rows.push(statement.get());
+    }
+  } finally {
+    statement.free();
   }
 
-  return result.values.map(([id, name]) => ({
+  return rows.map(([id, name]) => ({
     id: Number(id),
     name: String(name)
   }));
+}
+
+function assertActiveSampleReferences(companyId: number, bathId: number): void {
+  const statement = getDatabase().prepare(
+    `SELECT b.id
+     FROM baths b
+     INNER JOIN companies c ON c.id = b.company_id
+     WHERE b.id = ?
+       AND b.company_id = ?
+       AND b.deleted_at IS NULL
+       AND b.is_active = 1
+       AND c.deleted_at IS NULL
+       AND c.is_active = 1
+     LIMIT 1;`
+  );
+
+  try {
+    statement.bind([bathId, companyId]);
+    if (!statement.step()) {
+      throw new Error("Select an active bath belonging to the selected active company.");
+    }
+  } finally {
+    statement.free();
+  }
 }
 
 export const sampleReceivingRepository: SampleReceivingRepository = {
@@ -79,6 +112,7 @@ export const sampleReceivingRepository: SampleReceivingRepository = {
   },
 
   save(input) {
+    assertActiveSampleReferences(input.companyId, input.bathId);
     const database = getDatabase();
     database.run(
       `INSERT INTO sample_receivings (

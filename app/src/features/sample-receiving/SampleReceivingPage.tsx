@@ -47,10 +47,9 @@ export function SampleReceivingPage() {
 
     async function loadFormData() {
       try {
-        const [certificateNumber, companyOptions, bathOptions] = await Promise.all([
+        const [certificateNumber, companyOptions] = await Promise.all([
           sampleReceivingRepository.getNextCertificateNumber(),
-          sampleReceivingRepository.listCompanies(),
-          sampleReceivingRepository.listBaths()
+          sampleReceivingRepository.listCompanies()
         ]);
 
         if (!isMounted) {
@@ -59,7 +58,7 @@ export function SampleReceivingPage() {
 
         setValues((currentValues) => ({ ...currentValues, certificateNumber }));
         setCompanies(companyOptions);
-        setBaths(bathOptions);
+        setBaths([]);
       } catch {
         if (isMounted) {
           setStatusMessage("Sample Receiving requires the Eurolab Pro desktop database service.");
@@ -80,10 +79,30 @@ export function SampleReceivingPage() {
     setStatusMessage(null);
   }
 
+  async function updateCompany(companyId: string) {
+    setValues((currentValues) => ({ ...currentValues, companyId, bathId: "" }));
+    setErrors((currentErrors) => ({ ...currentErrors, companyId: undefined, bathId: undefined }));
+    setStatusMessage(null);
+
+    if (!companyId) {
+      setBaths([]);
+      return;
+    }
+
+    try {
+      const bathOptions = await sampleReceivingRepository.listBaths(Number(companyId));
+      setBaths(bathOptions);
+    } catch {
+      setBaths([]);
+      setStatusMessage("Unable to load baths for the selected company.");
+    }
+  }
+
   async function resetForm() {
     try {
       const certificateNumber = await sampleReceivingRepository.getNextCertificateNumber();
       setValues({ ...emptyForm, certificateNumber });
+      setBaths([]);
       setErrors({});
       setStatusMessage(null);
     } catch {
@@ -108,6 +127,7 @@ export function SampleReceivingPage() {
       const result = await sampleReceivingRepository.save(toSampleReceivingInput(values));
       const nextCertificateNumber = await sampleReceivingRepository.getNextCertificateNumber();
       setValues({ ...emptyForm, certificateNumber: nextCertificateNumber });
+      setBaths([]);
       setStatusMessage(`Saved sample receiving record ${result.certificateNumber}.`);
     } catch {
       setStatusMessage("Unable to save the sample receiving record.");
@@ -165,7 +185,7 @@ export function SampleReceivingPage() {
           <FormField label="Company" required error={errors.companyId}>
             <SelectInput
               value={values.companyId}
-              onChange={(event) => updateField("companyId", event.target.value)}
+              onChange={(event) => void updateCompany(event.target.value)}
               hasError={Boolean(errors.companyId)}
             >
               <option value="">Select company</option>
@@ -181,9 +201,10 @@ export function SampleReceivingPage() {
             <SelectInput
               value={values.bathId}
               onChange={(event) => updateField("bathId", event.target.value)}
+              disabled={!values.companyId}
               hasError={Boolean(errors.bathId)}
             >
-              <option value="">Select bath</option>
+              <option value="">{values.companyId ? "Select bath" : "Select company first"}</option>
               {baths.map((bath) => (
                 <option key={bath.id} value={bath.id}>
                   {bath.name}

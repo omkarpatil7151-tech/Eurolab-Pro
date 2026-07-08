@@ -148,7 +148,9 @@ export const companyRepository = {
 
   update(id: number, input: CompanyInput): CompanyRecord {
     assertUniqueCompanyName(input.name, id);
-    getDatabase().run(
+    const database = getDatabase();
+
+    database.run(
       `UPDATE companies
        SET name = ?,
            address = ?,
@@ -176,17 +178,38 @@ export const companyRepository = {
         id
       ]
     );
+
+    if (!input.isActive) {
+      database.run(
+        `UPDATE baths
+         SET is_active = 0,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE company_id = ? AND deleted_at IS NULL;`,
+        [id]
+      );
+    }
+
     persistDatabase();
 
     return this.getById(id);
   },
 
   softDelete(id: number): void {
-    getDatabase().run(
+    const database = getDatabase();
+
+    database.run(
       `UPDATE companies
        SET deleted_at = CURRENT_TIMESTAMP,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = ? AND deleted_at IS NULL;`,
+      [id]
+    );
+    database.run(
+      `UPDATE baths
+       SET is_active = 0,
+           deleted_at = CURRENT_TIMESTAMP,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE company_id = ? AND deleted_at IS NULL;`,
       [id]
     );
     persistDatabase();
