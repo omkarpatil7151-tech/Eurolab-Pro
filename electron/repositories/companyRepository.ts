@@ -32,6 +32,14 @@ export interface CompanyListResult {
   pageSize: number;
 }
 
+export interface CompanyRepository {
+  list(query: CompanyListQuery): CompanyListResult;
+  create(input: CompanyInput): CompanyRecord;
+  update(id: number, input: CompanyInput): CompanyRecord;
+  softDelete(id: number): void;
+  getById(id: number): CompanyRecord;
+}
+
 function mapCompany(row: unknown[]): CompanyRecord {
   return {
     id: Number(row[0]),
@@ -81,7 +89,7 @@ function assertUniqueCompanyName(name: string, currentId?: number): void {
   }
 }
 
-export const companyRepository = {
+export const companyRepository: CompanyRepository = {
   list(query: CompanyListQuery): CompanyListResult {
     const page = Math.max(1, query.page);
     const pageSize = Math.min(Math.max(5, query.pageSize), 50);

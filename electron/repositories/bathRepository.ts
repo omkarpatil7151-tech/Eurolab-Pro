@@ -31,6 +31,14 @@ export interface BathListResult {
   pageSize: number;
 }
 
+export interface BathRepository {
+  list(query: BathListQuery): BathListResult;
+  create(input: BathInput): BathRecord;
+  update(id: number, input: BathInput): BathRecord;
+  softDelete(id: number): void;
+  getById(id: number): BathRecord;
+}
+
 function queryBaths(sql: string, params: Array<string | number>): unknown[][] {
   const statement = getDatabase().prepare(sql);
   const rows: unknown[][] = [];
@@ -91,7 +99,7 @@ function assertUniqueBathName(companyId: number, name: string, currentId?: numbe
   }
 }
 
-export const bathRepository = {
+export const bathRepository: BathRepository = {
   list(query: BathListQuery): BathListResult {
     const page = Math.max(1, query.page);
     const pageSize = Math.min(Math.max(5, query.pageSize), 50);

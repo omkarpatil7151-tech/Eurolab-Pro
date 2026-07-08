@@ -4,6 +4,7 @@ import { initializeDatabase } from "./services/database";
 import { registerBathHandlers } from "./ipc/bathHandlers";
 import { registerCompanyHandlers } from "./ipc/companyHandlers";
 import { registerSampleReceivingHandlers } from "./ipc/sampleReceivingHandlers";
+import { registerStandardHandlers } from "./ipc/standardHandlers";
 
 const isDevelopment = Boolean(process.env.VITE_DEV_SERVER_URL);
 
@@ -43,6 +44,7 @@ app.whenReady().then(async () => {
   registerBathHandlers();
   registerCompanyHandlers();
   registerSampleReceivingHandlers();
+  registerStandardHandlers();
   createMainWindow();
 
   app.on("activate", () => {

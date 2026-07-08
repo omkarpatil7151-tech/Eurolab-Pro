@@ -15,6 +15,12 @@ contextBridge.exposeInMainWorld("eurolab", {
     update: (id: number, input: unknown) => ipcRenderer.invoke("baths:update", id, input),
     delete: (id: number) => ipcRenderer.invoke("baths:delete", id)
   },
+  standards: {
+    list: (query: unknown) => ipcRenderer.invoke("standards:list", query),
+    create: (input: unknown) => ipcRenderer.invoke("standards:create", input),
+    update: (id: number, input: unknown) => ipcRenderer.invoke("standards:update", id, input),
+    delete: (id: number) => ipcRenderer.invoke("standards:delete", id)
+  },
   sampleReceiving: {
     getNextCertificateNumber: () => ipcRenderer.invoke("sample-receiving:get-next-certificate-number"),
     listCompanies: () => ipcRenderer.invoke("sample-receiving:list-companies"),
