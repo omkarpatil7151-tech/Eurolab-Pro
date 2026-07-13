@@ -25,6 +25,9 @@ contextBridge.exposeInMainWorld("eurolab", {
     getNextCertificateNumber: () => ipcRenderer.invoke("sample-receiving:get-next-certificate-number"),
     listCompanies: () => ipcRenderer.invoke("sample-receiving:list-companies"),
     listBaths: (companyId: number) => ipcRenderer.invoke("sample-receiving:list-baths", companyId),
-    save: (input: unknown) => ipcRenderer.invoke("sample-receiving:save", input)
+    save: (input: unknown) => ipcRenderer.invoke("sample-receiving:save", input),
+    listSamples: () => ipcRenderer.invoke("sample-receiving:list-samples"),
+    getSampleById: (id: number) => ipcRenderer.invoke("sample-receiving:get-sample-by-id", id),
+    update: (input: unknown) => ipcRenderer.invoke("sample-receiving:update", input)
   }
 });

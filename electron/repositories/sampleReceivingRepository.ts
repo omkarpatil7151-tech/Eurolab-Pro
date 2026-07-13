@@ -8,6 +8,7 @@ export interface SelectOptionRecord {
 }
 
 export interface SampleReceivingInput {
+  id?: number;
   certificateNumber: string;
   companyId: number;
   bathId: number;
@@ -28,6 +29,9 @@ export interface SampleReceivingRepository {
   listCompanies(): SelectOptionRecord[];
   listBaths(companyId: number): SelectOptionRecord[];
   save(input: SampleReceivingInput): { id: number; certificateNumber: string };
+  listSamples(): SampleReceivingInput[];
+  getSampleById(id: number): SampleReceivingInput | undefined;
+  update(input: SampleReceivingInput): void;
 }
 
 function mapOptionRows(tableName: "companies" | "baths", companyId?: number): SelectOptionRecord[] {
@@ -152,5 +156,111 @@ export const sampleReceivingRepository: SampleReceivingRepository = {
     const id = Number(idResult.values[0][0]);
 
     return { id, certificateNumber: input.certificateNumber };
+  },
+
+  listSamples(): SampleReceivingInput[] {
+    const database = getDatabase();
+    const statement = database.prepare("SELECT * FROM sample_receivings WHERE deleted_at IS NULL;");
+    const rows: unknown[][] = [];
+
+    try {
+      while (statement.step()) {
+        rows.push(statement.get());
+      }
+    } finally {
+      statement.free();
+    }
+
+    return rows.map((row: any) => ({
+      id: row.id,
+      certificateNumber: row.certificate_number,
+      companyId: row.company_id,
+      bathId: row.bath_id,
+      receivedDate: row.received_date,
+      analysisDate: row.analysis_date,
+      submissionDate: row.submission_date,
+      receivedBy: row.received_by,
+      testingType: row.testing_type,
+      billedTo: row.billed_to,
+      email: row.email,
+      mobile: row.mobile,
+      sampleDescription: row.sample_description,
+      remarks: row.remarks
+    }));
+  },
+
+  getSampleById(id: number): SampleReceivingInput | undefined {
+    const database = getDatabase();
+    const statement = database.prepare("SELECT * FROM sample_receivings WHERE id = ? AND deleted_at IS NULL;");
+    let sample: SampleReceivingInput | undefined;
+
+    try {
+      statement.bind([id]);
+      if (statement.step()) {
+        const row: any = statement.get();
+        sample = {
+          id: row.id,
+          certificateNumber: row.certificate_number,
+          companyId: row.company_id,
+          bathId: row.bath_id,
+          receivedDate: row.received_date,
+          analysisDate: row.analysis_date,
+          submissionDate: row.submission_date,
+          receivedBy: row.received_by,
+          testingType: row.testing_type,
+          billedTo: row.billed_to,
+          email: row.email,
+          mobile: row.mobile,
+          sampleDescription: row.sample_description,
+          remarks: row.remarks
+        };
+      }
+    } finally {
+      statement.free();
+    }
+
+    return sample;
+  },
+
+  update(input: SampleReceivingInput): void {
+    assertActiveSampleReferences(input.companyId, input.bathId);
+    if (!input.id) {
+      throw new Error("Sample ID is required for update.");
+    }
+    const database = getDatabase();
+    database.run(
+      `UPDATE sample_receivings SET
+        certificate_number = ?,
+        company_id = ?,
+        bath_id = ?,
+        received_date = ?,
+        analysis_date = ?,
+        submission_date = ?,
+        received_by = ?,
+        testing_type = ?,
+        billed_to = ?,
+        email = ?,
+        mobile = ?,
+        sample_description = ?,
+        remarks = ?
+      WHERE id = ?;`,
+      [
+        input.certificateNumber,
+        input.companyId,
+        input.bathId,
+        input.receivedDate,
+        input.analysisDate,
+        input.submissionDate,
+        input.receivedBy,
+        input.testingType,
+        input.billedTo,
+        input.email,
+        input.mobile,
+        input.sampleDescription,
+        input.remarks,
+        input.id
+      ]
+    );
+    persistDatabase();
   }
 };

@@ -23,12 +23,15 @@ interface EurolabDesktopApi {
   };
   sampleReceiving: {
     getNextCertificateNumber(): Promise<string>;
-    listCompanies(): Promise<Array<{ id: number; name: string }>>;
-    listBaths(companyId: number): Promise<Array<{ id: number; name: string }>>;
-    save(input: import("@/types/sampleReceiving").SampleReceivingInput): Promise<import("@/types/sampleReceiving").SampleReceivingSaveResult>;
+    listCompanies(): Promise<import("electron").SelectOption[]>;
+    listBaths(companyId: number): Promise<import("electron").SelectOption[]>;
+    save(input: import("electron").SampleReceivingInput): Promise<{ id: number; certificateNumber: string }>;
+    listSamples(): Promise<import("electron").SampleReceivingRecord[]>;
+    getSampleById(id: number): Promise<import("electron").SampleReceivingRecord | undefined>;
+    update(input: import("electron").SampleReceivingInput): Promise<import("electron").SampleReceivingSaveResult>;
   };
 }
 
 interface Window {
-  eurolab?: EurolabDesktopApi;
+  eurolab: EurolabDesktopApi;
 }

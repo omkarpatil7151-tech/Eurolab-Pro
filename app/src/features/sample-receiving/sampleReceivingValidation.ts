@@ -49,6 +49,7 @@ export function hasValidationErrors(errors: SampleReceivingErrors): boolean {
 
 export function toSampleReceivingInput(values: SampleReceivingFormValues): SampleReceivingInput {
   return {
+    ...(values.id && { id: values.id }),
     certificateNumber: values.certificateNumber.trim(),
     companyId: Number(values.companyId),
     bathId: Number(values.bathId),
