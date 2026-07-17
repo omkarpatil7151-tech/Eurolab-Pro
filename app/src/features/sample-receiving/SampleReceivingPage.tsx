@@ -7,12 +7,7 @@ import { TextAreaInput } from "@/components/forms/TextAreaInput";
 import { TextInput } from "@/components/forms/TextInput";
 import { sampleReceivingRepository } from "@/services/sampleReceivingRepository";
 import type { SampleReceivingFormValues, SelectOption, TestingType } from "@/types/sampleReceiving";
-import {
-  hasValidationErrors,
-  toSampleReceivingInput,
-  validateSampleReceiving,
-  type SampleReceivingErrors
-} from "./sampleReceivingValidation";
+import { hasValidationErrors, toSampleReceivingInput, validateSampleReceiving, type SampleReceivingErrors } from "./sampleReceivingValidation";
 
 const emptyForm: SampleReceivingFormValues = {
   certificateNumber: "",
@@ -37,6 +32,7 @@ export function SampleReceivingPage() {
   const [errors, setErrors] = useState<SampleReceivingErrors>({});
   const [companies, setCompanies] = useState<SelectOption[]>([]);
   const [baths, setBaths] = useState<SelectOption[]>([]);
+  const [bathDescription, setBathDescription] = useState(""); // New field for bath description
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
@@ -44,18 +40,13 @@ export function SampleReceivingPage() {
 
   useEffect(() => {
     let isMounted = true;
-
     async function loadFormData() {
       try {
         const [certificateNumber, companyOptions] = await Promise.all([
           sampleReceivingRepository.getNextCertificateNumber(),
           sampleReceivingRepository.listCompanies()
         ]);
-
-        if (!isMounted) {
-          return;
-        }
-
+        if (!isMounted) return;
         setValues((currentValues) => ({ ...currentValues, certificateNumber }));
         setCompanies(companyOptions);
         setBaths([]);
@@ -65,13 +56,19 @@ export function SampleReceivingPage() {
         }
       }
     }
-
     void loadFormData();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
+
+  // Auto-fill Received Date with today's date for new samples
+  useEffect(() => {
+    if (!values.id) {
+      setValues(prev => ({ 
+        ...prev, 
+        receivedDate: new Date().toISOString().split('T')[0] 
+      }));
+    }
+  }, [values.id]);
 
   function updateField(field: keyof SampleReceivingFormValues, value: string) {
     setValues((currentValues) => ({ ...currentValues, [field]: value }));
@@ -79,34 +76,32 @@ export function SampleReceivingPage() {
     setStatusMessage(null);
   }
 
+  // Auto-copy Bath Name to Bath Description when bath is selected
+  useEffect(() => {
+    if (values.bathId) {
+      const selectedBath = baths.find(bath => bath.id === Number(values.bathId));
+      if (selectedBath) {
+        setBathDescription(selectedBath.name);
+      }
+    } else {
+      setBathDescription("");
+    }
+  }, [values.bathId, baths]);
+
   async function updateCompany(companyId: string) {
     setValues((currentValues) => ({ ...currentValues, companyId, bathId: "" }));
     setErrors((currentErrors) => ({ ...currentErrors, companyId: undefined, bathId: undefined }));
     setStatusMessage(null);
-
     if (!companyId) {
       setBaths([]);
       return;
     }
-
     try {
       const bathOptions = await sampleReceivingRepository.listBaths(Number(companyId));
       setBaths(bathOptions);
     } catch {
       setBaths([]);
       setStatusMessage("Unable to load baths for the selected company.");
-    }
-  }
-
-  async function resetForm() {
-    try {
-      const certificateNumber = await sampleReceivingRepository.getNextCertificateNumber();
-      setValues({ ...emptyForm, certificateNumber });
-      setBaths([]);
-      setErrors({});
-      setStatusMessage(null);
-    } catch {
-      setStatusMessage("Unable to refresh the certificate number.");
     }
   }
 
@@ -133,6 +128,18 @@ export function SampleReceivingPage() {
       setStatusMessage("Unable to save the sample receiving record.");
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function resetForm() {
+    try {
+      const certificateNumber = await sampleReceivingRepository.getNextCertificateNumber();
+      setValues({ ...emptyForm, certificateNumber });
+      setBaths([]);
+      setErrors({});
+      setStatusMessage(null);
+    } catch {
+      setStatusMessage("Unable to refresh the certificate number.");
     }
   }
 
@@ -222,7 +229,7 @@ export function SampleReceivingPage() {
             />
           </FormField>
 
-          <FormField label="Analysis Date" required error={errors.analysisDate}>
+          <FormField label="Analysis Date" error={errors.analysisDate}>
             <TextInput
               type="date"
               value={values.analysisDate}
@@ -231,7 +238,7 @@ export function SampleReceivingPage() {
             />
           </FormField>
 
-          <FormField label="Submission Date" required error={errors.submissionDate}>
+          <FormField label="Submission Date" error={errors.submissionDate}>
             <TextInput
               type="date"
               value={values.submissionDate}
@@ -291,9 +298,7 @@ export function SampleReceivingPage() {
               hasError={Boolean(errors.mobile)}
             />
           </FormField>
-        </div>
 
-        <div className="mt-2 grid grid-cols-2 gap-x-5 gap-y-2">
           <FormField label="Sample Description" required error={errors.sampleDescription}>
             <TextAreaInput
               value={values.sampleDescription}

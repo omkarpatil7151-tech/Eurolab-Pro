@@ -7,8 +7,6 @@ const requiredFields: Array<keyof SampleReceivingFormValues> = [
   "companyId",
   "bathId",
   "receivedDate",
-  "analysisDate",
-  "submissionDate",
   "receivedBy",
   "testingType",
   "billedTo",
