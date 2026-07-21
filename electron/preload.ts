@@ -29,5 +29,8 @@ contextBridge.exposeInMainWorld("eurolab", {
     listSamples: () => ipcRenderer.invoke("sample-receiving:list-samples"),
     getSampleById: (id: number) => ipcRenderer.invoke("sample-receiving:get-sample-by-id", id),
     update: (input: unknown) => ipcRenderer.invoke("sample-receiving:update", input)
+  },
+  analysis: {
+    listPendingSamples: () => ipcRenderer.invoke("analysis:list-pending-samples")
   }
 });

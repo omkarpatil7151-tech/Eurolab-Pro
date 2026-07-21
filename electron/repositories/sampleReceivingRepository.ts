@@ -93,7 +93,8 @@ export const sampleReceivingRepository: SampleReceivingRepository = {
   getNextCertificateNumber() {
     const database = getDatabase();
     const year = new Date().getFullYear();
-    const prefix = `EUR-${year}-`;
+    const month = new Date().getMonth() + 1;
+    const prefix = `LAB.${String(month).padStart(2, "0")}.${year}.`;
     const result = database.exec(
       `SELECT certificate_number FROM sample_receivings
        WHERE certificate_number LIKE '${prefix}%'
@@ -102,9 +103,11 @@ export const sampleReceivingRepository: SampleReceivingRepository = {
     )[0];
 
     const lastCertificate = result?.values[0]?.[0];
-    const nextSequence = lastCertificate ? Number(String(lastCertificate).replace(prefix, "")) + 1 : 1;
+    const INITIAL_SERIAL = 10790;
+    const lastSerial = lastCertificate ? Number(String(lastCertificate).replace(prefix, "")) : INITIAL_SERIAL;
+    const nextSerial = lastSerial + 1;
 
-    return `${prefix}${String(nextSequence).padStart(6, "0")}`;
+    return `${prefix}${nextSerial}`;
   },
 
   listCompanies() {

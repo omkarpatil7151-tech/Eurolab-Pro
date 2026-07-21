@@ -98,6 +98,18 @@ declare module "electron" {
     certificateNumber: string;
   }
 
+  export type AnalysisStatus = "Pending" | "In Progress" | "Completed" | "Approved" | "Rejected";
+
+  export interface AnalysisPendingSampleRecord {
+    id: number;
+    certificateNumber: string;
+    companyName: string;
+    bathName: string;
+    receivedDate: string;
+    testingType: string;
+    status: AnalysisStatus;
+  }
+
   export interface EurolabDesktopApi {
     sampleReceiving: {
       getNextCertificateNumber(): Promise<string>;
@@ -107,6 +119,9 @@ declare module "electron" {
       listSamples(): Promise<SampleReceivingRecord[]>;
       getSampleById(id: number): Promise<SampleReceivingRecord | undefined>;
       update(input: SampleReceivingInput): Promise<SampleReceivingSaveResult>;
+    };
+    analysis: {
+      listPendingSamples(): Promise<AnalysisPendingSampleRecord[]>;
     };
   }
 

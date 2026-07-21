@@ -30,6 +30,9 @@ interface EurolabDesktopApi {
     getSampleById(id: number): Promise<import("electron").SampleReceivingRecord | undefined>;
     update(input: import("electron").SampleReceivingInput): Promise<import("electron").SampleReceivingSaveResult>;
   };
+  analysis: {
+    listPendingSamples(): Promise<import("electron").AnalysisPendingSampleRecord[]>;
+  };
 }
 
 interface Window {

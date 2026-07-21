@@ -6,6 +6,8 @@ import { Dashboard } from "@/pages/Dashboard";
 import { ModulePage } from "@/pages/ModulePage";
 import { CompanyMasterPage } from "@/features/companies/CompanyMasterPage";
 import { SampleReceivingPage } from "@/features/sample-receiving/SampleReceivingPage";
+import { AnalysisPage } from "@/features/analysis/AnalysisPage";
+import { AnalysisDetailsPage } from "@/features/analysis/AnalysisDetailsPage";
 import { moduleDescriptions, navigationItems, type NavigationKey } from "@/constants/navigation";
 
 interface AppShellProps {
@@ -14,6 +16,7 @@ interface AppShellProps {
 
 export function AppShell({ onSignOut }: AppShellProps) {
   const [activeItem, setActiveItem] = useState<NavigationKey>("dashboard");
+  const [analysisSampleId, setAnalysisSampleId] = useState<number | null>(null);
 
   const activeNavigationItem = useMemo(
     () => navigationItems.find((item) => item.key === activeItem) ?? navigationItems[0],
@@ -54,7 +57,13 @@ export function AppShell({ onSignOut }: AppShellProps) {
           {activeItem === "companies" && <CompanyMasterPage />}
           {activeItem === "baths" && <BathMasterPage />}
           {activeItem === "sample-receiving" && <SampleReceivingPage />}
-          {activeItem !== "dashboard" && activeItem !== "companies" && activeItem !== "baths" && activeItem !== "sample-receiving" && (
+          {activeItem === "analysis" && analysisSampleId === null && (
+            <AnalysisPage onOpenDetails={(sampleId) => setAnalysisSampleId(sampleId)} />
+          )}
+          {activeItem === "analysis" && analysisSampleId !== null && (
+            <AnalysisDetailsPage sampleId={analysisSampleId} onBack={() => setAnalysisSampleId(null)} />
+          )}
+          {activeItem !== "dashboard" && activeItem !== "companies" && activeItem !== "baths" && activeItem !== "sample-receiving" && activeItem !== "analysis" && (
             <ModulePage icon={activeNavigationItem.icon} title={activeNavigationItem.label} description={moduleDescriptions[activeItem]} />
           )}
         </section>
